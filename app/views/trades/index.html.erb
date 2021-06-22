@@ -1,0 +1,29 @@
+<div class="container">
+  <h1 class="display-2 mb-2">History</h1>
+
+  <% @trades.each do |trade| %>
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Trade #<%= trade.id %></h5>
+        <h6 class="card-subtitle mb-4 text-muted"><%= time_ago_in_words(trade.created_at) %></h6>
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col">
+              <% trade.left_side_pokemons.each do |trade_pokemon| %>
+                <p><strong><%= trade_pokemon.name %></strong></p>
+                <p><small>Base Experience: <%= trade_pokemon.score %></small></p>
+              <% end %>
+            </div>
+            <div class="col">
+              <% trade.right_side_pokemons.each do |trade_pokemon| %>
+                <p><strong><%= trade_pokemon.name %></strong></p>
+                <p><small>Base Experience: <%= trade_pokemon.score %></small></p>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <%= fairness_footer(trade) %>
+    </div>
+  <% end %>
+</div>

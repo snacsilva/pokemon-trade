@@ -1,3 +1,8 @@
 Rails.application.routes.draw do
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+  root "trades#new"
+
+  resources "trades", only: [:index, :new, :create]
+  post "trades/simulate" => "trades#simulate"
+
+  resources "pokemons", only: [:index, :new, :create]
 end
