@@ -13,118 +13,47 @@
 # sticking to rails and rspec-rails APIs to keep things simple and stable.
 
 RSpec.describe "/trades", type: :request do
-  
-  # Trade. As you add validations to Trade, be sure to
-  # adjust the attributes here as well.
-  let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
-  }
+  let(:tentacruel) { create(:tentacruel) }
+  let(:dragonite) { create(:dragonite) }
+  let(:mew) { create(:mew) }
+  let(:params) { { left: [mew.name], right: [dragonite.name] } }
+  let(:params_1) { { left: [tentacruel.name], right: [dragonite.name] } }
 
-  let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
-  }
-
-  describe "GET /index" do
-    it "renders a successful response" do
-      Trade.create! valid_attributes
-      get trades_url
-      expect(response).to be_successful
+  describe "POST /trades" do
+    subject(:create_trade_request) do
+      post "/trades", params: params
     end
-  end
 
-  describe "GET /show" do
-    it "renders a successful response" do
-      trade = Trade.create! valid_attributes
-      get trade_url(trade)
-      expect(response).to be_successful
-    end
-  end
-
-  describe "GET /new" do
-    it "renders a successful response" do
-      get new_trade_url
-      expect(response).to be_successful
-    end
-  end
-
-  describe "GET /edit" do
-    it "render a successful response" do
-      trade = Trade.create! valid_attributes
-      get edit_trade_url(trade)
-      expect(response).to be_successful
-    end
-  end
-
-  describe "POST /create" do
-    context "with valid parameters" do
-      it "creates a new Trade" do
-        expect {
-          post trades_url, params: { trade: valid_attributes }
-        }.to change(Trade, :count).by(1)
+    context "with valid params" do
+      it "responds with HTTP 302" do
+        create_trade_request
+        expect(response).to have_http_status(200)
       end
 
-      it "redirects to the created trade" do
-        post trades_url, params: { trade: valid_attributes }
-        expect(response).to redirect_to(trade_url(Trade.last))
-      end
-    end
-
-    context "with invalid parameters" do
-      it "does not create a new Trade" do
-        expect {
-          post trades_url, params: { trade: invalid_attributes }
-        }.to change(Trade, :count).by(0)
-      end
-
-      it "renders a successful response (i.e. to display the 'new' template)" do
-        post trades_url, params: { trade: invalid_attributes }
-        expect(response).to be_successful
+      it "creates a new trade" do
+        expect { create_trade_request }.to change(Trade, :count).by(1)
       end
     end
   end
 
-  describe "PATCH /update" do
-    context "with valid parameters" do
-      let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
-      }
-
-      it "updates the requested trade" do
-        trade = Trade.create! valid_attributes
-        patch trade_url(trade), params: { trade: new_attributes }
-        trade.reload
-        skip("Add assertions for updated state")
-      end
-
-      it "redirects to the trade" do
-        trade = Trade.create! valid_attributes
-        patch trade_url(trade), params: { trade: new_attributes }
-        trade.reload
-        expect(response).to redirect_to(trade_url(trade))
-      end
+  describe "POST /trades/simulate" do
+    subject(:simulate_trade) { post "/trades/simulate", params: params }
+    subject(:simulate_trade_1) { post "/trades/simulate", params: params_1 }
+    let(:response_body) { JSON.parse(response.body) }
+    
+    it "returns HTTP 200" do
+      simulate_trade
+      expect(response).to have_http_status(200)
     end
-
-    context "with invalid parameters" do
-      it "renders a successful response (i.e. to display the 'edit' template)" do
-        trade = Trade.create! valid_attributes
-        patch trade_url(trade), params: { trade: invalid_attributes }
-        expect(response).to be_successful
-      end
+    
+    it "returns the trade fairness" do
+      simulate_trade
+      expect(response_body).to include({ "fair" => true })
     end
-  end
-
-  describe "DELETE /destroy" do
-    it "destroys the requested trade" do
-      trade = Trade.create! valid_attributes
-      expect {
-        delete trade_url(trade)
-      }.to change(Trade, :count).by(-1)
-    end
-
-    it "redirects to the trades list" do
-      trade = Trade.create! valid_attributes
-      delete trade_url(trade)
-      expect(response).to redirect_to(trades_url)
+    
+    it "returns the trade unfair" do
+      simulate_trade_1
+      expect(response_body).to include({ "fair" => false })
     end
   end
 end

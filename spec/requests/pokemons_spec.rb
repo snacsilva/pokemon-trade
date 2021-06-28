@@ -13,30 +13,21 @@
 # sticking to rails and rspec-rails APIs to keep things simple and stable.
 
 RSpec.describe "/pokemons", type: :request do
-  
-  # Pokemon. As you add validations to Pokemon, be sure to
-  # adjust the attributes here as well.
-  let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
-  }
-
-  let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
-  }
 
   describe "GET /index" do
-    it "renders a successful response" do
-      Pokemon.create! valid_attributes
-      get pokemons_url
-      expect(response).to be_successful
-    end
-  end
+    let!(:charmander) { create(:charmander) }
 
-  describe "GET /show" do
-    it "renders a successful response" do
-      pokemon = Pokemon.create! valid_attributes
-      get pokemon_url(pokemon)
-      expect(response).to be_successful
+    it "returns HTTP 200" do
+      get pokemons_path, params: { query: "char" }
+      expect(response).to have_http_status(200)
+    end
+
+    it "returns a pokemon list" do
+      get pokemons_path, params: { query: "char" }
+      expect(JSON.parse(response.body)).to include(hash_including({
+                                                                    "name" => charmander.name,
+                                                                    "base_experience" => charmander.base_experience
+                                                                  }))
     end
   end
 
@@ -47,84 +38,82 @@ RSpec.describe "/pokemons", type: :request do
     end
   end
 
-  describe "GET /edit" do
-    it "render a successful response" do
-      pokemon = Pokemon.create! valid_attributes
-      get edit_pokemon_url(pokemon)
-      expect(response).to be_successful
-    end
-  end
-
   describe "POST /create" do
-    context "with valid parameters" do
-      it "creates a new Pokemon" do
-        expect {
-          post pokemons_url, params: { pokemon: valid_attributes }
-        }.to change(Pokemon, :count).by(1)
+    subject(:create_pokemon) { post pokemons_path, params: { name: name } }
+
+    let(:name) { "tentacruel" }
+
+    context "with valid params" do
+      before do
+        stub_request(:get, "https://pokeapi.co/api/v2/pokemon/tentacruel")
+          .to_return(status: 200, body: { name: "tentacruel", base_experience: 180, id: 73 }.to_json)
       end
 
-      it "redirects to the created pokemon" do
-        post pokemons_url, params: { pokemon: valid_attributes }
-        expect(response).to redirect_to(pokemon_url(Pokemon.last))
-      end
-    end
-
-    context "with invalid parameters" do
-      it "does not create a new Pokemon" do
-        expect {
-          post pokemons_url, params: { pokemon: invalid_attributes }
-        }.to change(Pokemon, :count).by(0)
+      it "redirects to new_pokemon_path" do
+        create_pokemon
+        expect(response).to redirect_to(new_pokemon_path)
       end
 
-      it "renders a successful response (i.e. to display the 'new' template)" do
-        post pokemons_url, params: { pokemon: invalid_attributes }
-        expect(response).to be_successful
-      end
-    end
-  end
-
-  describe "PATCH /update" do
-    context "with valid parameters" do
-      let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
-      }
-
-      it "updates the requested pokemon" do
-        pokemon = Pokemon.create! valid_attributes
-        patch pokemon_url(pokemon), params: { pokemon: new_attributes }
-        pokemon.reload
-        skip("Add assertions for updated state")
+      it "sends a flash notice" do
+        create_pokemon
+        expect(flash[:notice]).to eq("Pokemon created successfully")
       end
 
-      it "redirects to the pokemon" do
-        pokemon = Pokemon.create! valid_attributes
-        patch pokemon_url(pokemon), params: { pokemon: new_attributes }
-        pokemon.reload
-        expect(response).to redirect_to(pokemon_url(pokemon))
+      it "creates a new pokemon querying the PokeAPI" do
+        expect { create_pokemon }.to change(Pokemon, :count).by(1)
       end
     end
 
-    context "with invalid parameters" do
-      it "renders a successful response (i.e. to display the 'edit' template)" do
-        pokemon = Pokemon.create! valid_attributes
-        patch pokemon_url(pokemon), params: { pokemon: invalid_attributes }
-        expect(response).to be_successful
+    context "with empty params" do
+      let(:name) { "" }
+
+      before do
+        stub_request(:get, "https://pokeapi.co/api/v2/pokemon/")
+          .to_return(status: 200, body: { name: "", base_experience: 180, id: 73 }.to_json)
+      end
+
+      it "redirects to new_pokemon_path" do
+        create_pokemon
+        expect(response).to redirect_to(new_pokemon_path)
+      end
+
+      it "sends a flash error" do
+        create_pokemon
+        expect(flash[:error]).to eq("Empty pokemon name. Insert a name!")
       end
     end
-  end
 
-  describe "DELETE /destroy" do
-    it "destroys the requested pokemon" do
-      pokemon = Pokemon.create! valid_attributes
-      expect {
-        delete pokemon_url(pokemon)
-      }.to change(Pokemon, :count).by(-1)
+    context "with invalid params" do
+      let(:name) { "zip" }
+
+      before do
+        stub_request(:get, "https://pokeapi.co/api/v2/pokemon/#{name}")
+          .to_return(status: 200, body: "not found")
+      end
+
+      it "redirects to new_pokemon_path" do
+        create_pokemon
+        expect(response).to redirect_to(new_pokemon_path)
+      end
+
+      it "sends a flash error" do
+        create_pokemon
+        expect(flash[:error]).to eq("What you're try to add ('zip') is not a pokemon! =(")
+      end
     end
 
-    it "redirects to the pokemons list" do
-      pokemon = Pokemon.create! valid_attributes
-      delete pokemon_url(pokemon)
-      expect(response).to redirect_to(pokemons_url)
+    context "with a already created pokemon" do
+      before do
+        create(:pokemon, name: name)
+
+        stub_request(:get, "https://pokeapi.co/api/v2/pokemon/#{name}")
+          .to_return(status: 200, body: { name: name, base_experience: 180, id: 73 }.to_json)
+      end
+
+      it "redirects to new_pokemon_path" do
+        create_pokemon
+        expect(response).to redirect_to(new_pokemon_path)
+      end
     end
   end
 end
