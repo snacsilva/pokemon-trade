@@ -1,0 +1,22 @@
+<div class="container">
+  <h1 class="display-2 mb-2">Pokemons</h1>
+
+ <% @pokemons.each do |pokemon| %>
+    <div class="card mb-2">
+      <div class="card-body">
+        <h5 class="card-title">pokemon #<%= pokemon.id %></h5>
+        <div class="container-fluid">
+          <div class="row">
+            <div id="poke-container" class="ui cards">
+              <p><%= image_tag "#{pokemon.img}"%></p>
+              <p><strong><%= pokemon.name %></strong></p>
+              <p><small>Base Experience: <%= pokemon.base_experience %></small></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+
