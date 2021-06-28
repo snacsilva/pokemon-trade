@@ -11,6 +11,7 @@ pokemons.results.each{ |pokemon|
   poke = PokeApi.get(pokemon: pokemon.name)
   Pokemon.create(
     name: poke.name,
-    base_experience: poke.base_experience
+    base_experience: poke.base_experience,
+    img: poke.sprites.front_default
   )
 }

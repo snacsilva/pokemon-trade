@@ -13,3 +13,22 @@
  *= require_tree .
  *= require_self
  */
+
+ .site-layout-content {
+  background: #fff;
+  padding: 24px;
+  min-height: 380px;
+}
+
+.logo {
+  width: 100px;
+  min-height: 31px;
+  margin: 16px 24px 16px 0;
+  float: left;
+  background-image: url(https://static1.textcraft.net/data1/f/4/f490c9f2c9718c23aeb55bd5fbbb9fb23170a331da39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd80709e997837b44e4cf02f63ab47b56cf530e.png);
+  background-repeat: no-repeat;
+}
+
+.menu {
+  background: red;
+}

@@ -1,14 +1,15 @@
 class PokemonsController < ApplicationController
   def index
-    pokemons = Pokemons.get_pokemons(pokemon_search_params)
-    render json: pokemons
+    @pokemons = Pokemon.all
   end
+
+  def show; end
 
   def new; end
 
   def create
     pokemon = Pokemons.fetch_pokemon(pokemon_params[:name])
-    Pokemons.save_pokemon(pokemon)
+    # Pokemons.save_pokemon(pokemon)
     redirect_to new_pokemon_path, notice: "Pokemon created successfully"
   rescue Pokemons::PokemonNotFound, Pokemons::PokemonAlreadyExistError => exception
     redirect_to new_pokemon_path, flash: { error: exception.message }

@@ -28,23 +28,8 @@
   </head>
 
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark mb-4" style="background-color: #FF0000;">
-      <div class="container">
-        <h1 class="navbar-brand text-warning">Pokemon Trader</h1>
-        <div class="navbar-nav">
-          <%= link_to "New trade", new_trade_path, class: "nav-link text-warning" %>
-          <%= link_to "Pokemons", new_pokemon_path, class: "nav-link text-warning" %>
-          <%= link_to "History", trades_path, class: "nav-link text-warning" %>
-        </ul>
-      </div>
-    </nav>
+    
+    <%= javascript_pack_tag 'index' %>
 
-    <div class="container">
-      <%= render "notice" %>
-      <%= render "alert" %>
-      <%= render "error" %>
-    </div>
-
-    <%= yield %>
   </body>
 </html>
