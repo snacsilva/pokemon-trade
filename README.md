@@ -22,15 +22,19 @@ This is a Pokemon trader project! Here one or two persons can trade pokemons if 
 ```
 bundle
 yarn install
-rails db:migrate
-rails db:seed
+rails db:setup
 rails s
+```
+
+## Tests
+
+```
+rspec
 ```
 
 
 ### There are somethings that will be improved over time. Are they:
 
-* Make tests ( I made it sickly, so I prefer to make the features and leave to do the better tests a little later )
 * Improve the view
   * Cards to show pokemons
   * A better layout to show the history
